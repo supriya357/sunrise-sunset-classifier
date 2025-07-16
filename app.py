@@ -1,29 +1,31 @@
 import streamlit as st
 import joblib
-import cv2
 import numpy as np
+import cv2
 from PIL import Image
 
-# Load your trained model
+# Load model
 model = joblib.load("sunrise_sunset_model.pkl")
 
-# Settings
+# Image settings
 IMG_SIZE = 64
-CLASS_NAMES = ["Sunrise", "Sunset"]
 
-def predict_image(image: Image.Image):
-    image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    resized = cv2.resize(image_cv, (IMG_SIZE, IMG_SIZE))
-    flattened = resized.flatten().reshape(1, -1)
-    prediction = model.predict(flattened)
-    return CLASS_NAMES[prediction[0]]
+def preprocess(image):
+    image = image.resize((IMG_SIZE, IMG_SIZE))
+    img_array = np.array(image).flatten().reshape(1, -1)
+    return img_array
 
-st.title("🌅 Sunrise or Sunset Classifier")
-st.write("Upload one image to predict.")
+st.title("🌅 Sunrise vs Sunset Classifier")
 
-uploaded = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
-if uploaded:
-    img = Image.open(uploaded)
-    st.image(img, use_column_width=True)
-    label = predict_image(img)
-    st.success(f"Prediction: **{label}**")
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert('RGB')
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    processed = preprocess(image)
+    prediction = model.predict(processed)[0]
+    
+    label = "🌄 Sunrise" if prediction == 0 else "🌇 Sunset"
+    st.success(f"**Prediction:** {label}")
+
