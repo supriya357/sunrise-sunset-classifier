@@ -1,5 +1,5 @@
 import streamlit as st
-import joblibhttps://github.com/supriya357/sunrise-sunset-classifier
+import joblib
 import cv2
 import numpy as np
 from PIL import Image
